@@ -48,11 +48,11 @@ At this speed, the LED will appear to be dimly lit or as if it's constantly on, 
  - Take screenshots and add them to the README below.
  ![alt text](Measureoverhead.png)
  
-
 ## even shorter blink
 - delay() is limited to 1 ms. Find a function that delays 1 microsecond. 
  - Try different delays and measure the overhead.
  - Take screenshots and add them to the README below.
+ ![alt text](image.png)
 
 ## Git
  - Commit the new README with your screenshots
