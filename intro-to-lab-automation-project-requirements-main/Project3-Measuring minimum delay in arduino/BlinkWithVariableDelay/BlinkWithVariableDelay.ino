@@ -19,7 +19,7 @@ void setup() {
 // the loop function runs over and over again forever
 void loop() {
   digitalWrite(LED_PIN, HIGH);  // turn the LED on (HIGH is the voltage level)
-  delay(BLINK_TIME);                      // wait for a second
+  // delay(BLINK_TIME);                      // wait for a second
   digitalWrite(LED_PIN, LOW);   // turn the LED off by making the voltage LOW
-  delay(BLINK_TIME);                      // wait for a second
+  // delay(BLINK_TIME);                      // wait for a second
 }
