@@ -23,19 +23,30 @@ At this speed, the LED will appear to be dimly lit or as if it's constantly on, 
 ## Use logic analyzer to see and measure the blink
  - connect ADALM2000 to grove kit: 
     - gnd in ADALM to GND in arduino (black color is used as a standard for GND)
-    - digital pin 0 (solid pink) to pin13 in arduino (why?)
- - open scopy program
+    - digital pin 0 (solid pink) to pin13 in arduino (why?)  
+   ```
+   Becuse the scopy app need the 0 value (ground) 
+   ``` 
+ - open scopy program 
  - connect to ADALM2000
  - open scopy logic analyzer
  - activate DIO0 and rising edge and run (why?)
- - play with the scopy parameters until you can see the separate blinks. Which parameter(s) do you need to change?
+ - play with the scopy parameters until you can see the separate blinks. Which parameter(s) do you need to change? 
+ ```
+ in scopy app i needed to change the sample rate in order to see the freq of the hz.
+ ```
  - use cursors and sample rate to measure the pulse width
  - take screenshots and add them to the README below.
+ ![alt text](Uselogicanalyzertoseeandmeasuretheblink.png)
 
 ## Measure overhead
  - Remove the delay statements and upload the code
- - Measure pulse width. What is the minimum time that the signal is HIGH and LOW? this is the overhead.
+ - Measure pulse width. ? this is the overhead.
+ ```
+ the over head in 3 um
+ ```
  - Take screenshots and add them to the README below.
+ ![alt text](Measureoverhead.png)
  
 
 ## even shorter blink
