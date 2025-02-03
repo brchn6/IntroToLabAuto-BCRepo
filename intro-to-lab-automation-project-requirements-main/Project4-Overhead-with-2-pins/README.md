@@ -12,8 +12,9 @@
 ## Exercise 1
 - measure the delay between the two digitalWrite() functions using the logic analyzer.
 Paste screenshots below:
+![delay between the two digitalWrite()](image.png)
 
-enter the delay in usec here:  __________
+enter the delay in usec here:  1ms
 
 ## write a 2nd program that does the following:
 - based on the first program, add any calculation (adding one to an additional variable for example) and store the result in a variable between the two digitalWrite() functions.
