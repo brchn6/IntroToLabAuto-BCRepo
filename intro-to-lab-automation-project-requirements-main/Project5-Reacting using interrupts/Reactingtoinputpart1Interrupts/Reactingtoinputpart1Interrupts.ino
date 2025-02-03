@@ -48,13 +48,12 @@ void setup() {
 void loop() {
     int buttonState = digitalRead(BUTTON_PIN); // Read button state
 
-    if (buttonState == LOW) {  // Button pressed (LOW because of INPUT_PULLUP)
-        digitalWrite(LED_PIN, HIGH); // Turn LED on
-    } else {  
-        digitalWrite(LED_PIN, LOW);  // Turn LED off
+    if (buttonState == HIGH) {
+        delay(DELAY_MS); // Simulate long process
+        digitalWrite(LED_PIN, HIGH); // Turn on LED
+        Serial.println("Button pressed!");
+    } else {
+        digitalWrite(LED_PIN, LOW); // Turn off LED
+        // Serial.println("Button not pressed!");
     }
-
-    Serial.println("Processing long task...");
-    delay(DELAY_MS); // Simulating a long process
-    Serial.println("Task completed!");
 }
