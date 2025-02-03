@@ -24,6 +24,9 @@ answer here: The light on pin 4 may not work correctly because the delay(1000) f
 - Add code to create an interrupt pin (why can't it be the button pin?). Use a variable for this.
 - Short the interrupt pin with the button pin
 - test. Does it work?
+'''
+YESSSSSSS
+'''
 
 ## Exercises
  - commit and upload your code in this project folder.
