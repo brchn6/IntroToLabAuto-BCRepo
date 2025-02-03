@@ -11,8 +11,9 @@ paste a screen shot from the logic analyzer below:
  
 ## update the code to add a delay in the loop function
 - Add a delay of 1 seconds in the loop function that simulates a long process. Does the LED still turn off after 5 seconds? Why or why not?
-answer here: __________
+answer here: Yes, the LED still turns off after 5 seconds because the millis() function is non-blocking and continues to count time even during the delay() function.
 add a screen shot from the logic analyzer below:
+![alt text](image.png)
 
 ## Write a second program. The proper way to solve this problem is to use a timer
 - install package mstimer2 from the library manager
@@ -25,5 +26,5 @@ add a screen shot from the logic analyzer below:
 - check that although the delay of 1 second is still in the loop function, the LED now turns off after 5 seconds
 
 - change the LED time ON from 5 seconds to 30 ms, measure in the scope the time the LED is ON. is it 30 ms? Why or why not?
-answer here: __________
+answer here: The LED may not turn off exactly after 30 ms due to the delay() function in the loop, which can cause timing inaccuracies. Using a hardware timer would provide more precise timing.
 paste a screen shot from the scope below:
