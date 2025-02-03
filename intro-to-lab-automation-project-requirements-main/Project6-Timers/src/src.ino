@@ -9,11 +9,15 @@ volatile bool buttonPressed = true;   // Flag set in the ISR when button is pres
 volatile unsigned long startTime = 0;    // Stores the time when the button was pressed
 bool ledOn = false;                      // Tracks whether the LED is currently on
 
-// Interrupt Service Routine for the button press
+
 void buttonISR() {
-  // Since we're using INPUT_PULLUP, the button press brings the pin LOW.
-  // We trigger on FALLING edge.
-  buttonPressed = true; // Set the flag; main loop will handle turning on the LED.
+  // Check if a button press was registered by the ISR
+  if (buttonPressed) {
+    buttonPressed = false; // If the LED is off, turn it on and start the timer
+    ledOn = true;
+    startTime = millis();
+    digitalWrite(LED_PIN, HIGH);
+    Serial.println("LED turned ON");}
 }
 
 void setup() {
@@ -25,23 +29,13 @@ void setup() {
   pinMode(BUTTON_PIN, INPUT_PULLUP);
 
   // Attach interrupt on BUTTON_PIN on the falling edge (button pressed)
-  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), buttonISR, FALLING);
+  attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), buttonISR, CHANGE);
 
   // Optionally, start Serial Monitor to see debug messages
   Serial.begin(9600);
 }
 
 void loop() {
-  // Check if a button press was registered by the ISR
-  if (buttonPressed) {
-    // Clear the flag, turn on the LED, and record the current time
-    buttonPressed = false;
-    ledOn = true;
-    startTime = millis();
-    digitalWrite(LED_PIN, HIGH);
-    Serial.println("LED turned ON");
-  }
-
   // If the LED is on, check if 5 seconds have passed
   if (ledOn) {
     if (millis() - startTime >= 5000UL) {  // 5000 milliseconds = 5 seconds
