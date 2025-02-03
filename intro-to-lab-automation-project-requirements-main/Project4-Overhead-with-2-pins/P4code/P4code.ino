@@ -31,10 +31,10 @@
 // ## Git
 //  - Commit and push the two programs and the README into the repository
 
-const int LED_PIN_13 = 13;
-const int LED_PIN_12 = 12;
-const int DELAY_TIME_US = 1000;
-
+const int LED_PIN_13 = 13; //this line indacates that the LED is connected to pin 13
+const int LED_PIN_12 = 12; 
+const int DELAY_TIME_US = 1000; //corespo=de to 1ms
+  
 // The setup function runs once when you press reset or power the board
 void setup() {
   // Initialize digital pin LED_PIN as an output
