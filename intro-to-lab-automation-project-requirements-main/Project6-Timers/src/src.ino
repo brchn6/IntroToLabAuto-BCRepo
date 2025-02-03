@@ -13,7 +13,7 @@ void turnOffLED() {
   digitalWrite(LED_PIN, LOW);   // Turn off the LED
   ledOn = false;
   MsTimer2::stop();             // Stop the timer so it doesn't call the callback again
-  Serial.println("LED turned OFF after 5 seconds via timer callback");
+  Serial.println("LED turned OFF after 30 ms");
 }
 
 void buttonISR() {
@@ -24,7 +24,7 @@ void buttonISR() {
     Serial.println("LED turned ON");
 
     
-    MsTimer2::set(5000, turnOffLED);
+    MsTimer2::set(30, turnOffLED);
     MsTimer2::start();
   }
 }
@@ -44,5 +44,6 @@ void setup() {
 }
 
 void loop() {
+  delay(1000);
 
 }

@@ -8,11 +8,6 @@
 - Do not use a delay() function here. Please use the system clock to measure the time. look for the millis() function in the Arduino reference.
 Test the code and make sure it works as expected
 paste a screen shot from the logic analyzer below:
- 
-## update the code to add a delay in the loop function
-- Add a delay of 1 seconds in the loop function that simulates a long process. Does the LED still turn off after 5 seconds? Why or why not?
-answer here: Yes, the LED still turns off after 5 seconds because the millis() function is non-blocking and continues to count time even during the delay() function.
-add a screen shot from the logic analyzer below:
 ![alt text](image.png)
 
 ## Write a second program. The proper way to solve this problem is to use a timer
