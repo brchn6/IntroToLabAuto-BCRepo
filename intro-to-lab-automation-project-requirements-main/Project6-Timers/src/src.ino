@@ -8,12 +8,12 @@
 // Flags to indicate the state of the LED
 volatile bool ledOn = false;
 
-// This is the function that i will call in the interrupt.
+// This is the function name callback 
 void turnOffLED() {
   digitalWrite(LED_PIN, LOW);   // Turn off the LED
   ledOn = false;
   MsTimer2::stop();             // Stop the timer so it doesn't call the callback again
-  Serial.println("LED turned OFF after 30 ms");
+  Serial.println("LED turned OFF after 5 s");
 }
 
 void buttonISR() {
@@ -24,7 +24,7 @@ void buttonISR() {
     Serial.println("LED turned ON");
 
     
-    MsTimer2::set(30, turnOffLED);
+    MsTimer2::set(5000, turnOffLED);
     MsTimer2::start();
   }
 }
@@ -45,5 +45,4 @@ void setup() {
 
 void loop() {
   delay(1000);
-
 }
