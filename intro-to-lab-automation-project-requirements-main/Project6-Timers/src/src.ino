@@ -1,47 +1,48 @@
 #include <Arduino.h>
+#include <MsTimer2.h>
 
 // Pin definitions
 #define LED_PIN 4
-#define BUTTON_PIN 2  // Button is connected to pin 2 
+#define BUTTON_PIN 2  // Button is connected to pin 2
 
-// Variables shared between ISR and main loop
-volatile bool buttonPressed = true;   // Flag set in the ISR when button is pressed
-volatile unsigned long startTime = 0;    // Stores the time when the button was pressed
-bool ledOn = false;                      // Tracks whether the LED is currently on
+// Flags to indicate the state of the LED
+volatile bool ledOn = false;
 
+// This is the function that i will call in the interrupt.
+void turnOffLED() {
+  digitalWrite(LED_PIN, LOW);   // Turn off the LED
+  ledOn = false;
+  MsTimer2::stop();             // Stop the timer so it doesn't call the callback again
+  Serial.println("LED turned OFF after 5 seconds via timer callback");
+}
 
 void buttonISR() {
-  // Check if a button press was registered by the ISR
-  if (buttonPressed) {
-    buttonPressed = false; // If the LED is off, turn it on and start the timer
+  // Only act if the LED is not already on
+  if (!ledOn) {
     ledOn = true;
-    startTime = millis();
-    digitalWrite(LED_PIN, HIGH);
-    Serial.println("LED turned ON");}
+    digitalWrite(LED_PIN, HIGH);  // Turn on the LED
+    Serial.println("LED turned ON");
+
+    
+    MsTimer2::set(5000, turnOffLED);
+    MsTimer2::start();
+  }
 }
 
 void setup() {
-  // Initialize the LED pin as output
+  // Initialize LED pin as output and ensure it's initially off
   pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, LOW);  // Ensure LED is off initially
+  digitalWrite(LED_PIN, LOW);
 
-  // Initialize the button pin as input with internal pull-up enabled
+  // Initialize the button pin as input with internal pull-up resistor enabled
   pinMode(BUTTON_PIN, INPUT_PULLUP);
-
-  // Attach interrupt on BUTTON_PIN on the falling edge (button pressed)
+  
   attachInterrupt(digitalPinToInterrupt(BUTTON_PIN), buttonISR, CHANGE);
 
-  // Optionally, start Serial Monitor to see debug messages
+  // Start Serial Monitor for debugging messages.
   Serial.begin(9600);
 }
 
 void loop() {
-  // If the LED is on, check if 5 seconds have passed
-  if (ledOn) {
-    if (millis() - startTime >= 5000UL) {  // 5000 milliseconds = 5 seconds
-      digitalWrite(LED_PIN, LOW);  // Turn off the LED
-      ledOn = false;
-      Serial.println("LED turned OFF after 5 seconds");
-    }
-  }
+
 }

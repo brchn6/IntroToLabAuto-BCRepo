@@ -19,8 +19,10 @@ add a screen shot from the logic analyzer below:
 - install package mstimer2 from the library manager
 - read the readme file of the package and note the package limitations
 - open an example of the package, examine the code and its functions and how to use them.
-- implement a timer to turn off the LED after 5 seconds
+- implement a timer to turn off the LED after 5 seconds 
 - note the callback in the timer. When is it called?
+``` The callback is called when the timer expires.```
+![alt text](image-1.png)
 
 ## Exercises
 - check that although the delay of 1 second is still in the loop function, the LED now turns off after 5 seconds
