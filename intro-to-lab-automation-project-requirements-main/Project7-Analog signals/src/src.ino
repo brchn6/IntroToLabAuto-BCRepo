@@ -24,7 +24,7 @@ void setup() {
 
     attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), handleButtonPress, FALLING); // Trigger interrupt on falling edge
 
-    PWM.begin();                            // Initialize PWM on pin 4
+    PWM.begin(300);                   // Initialize PWM on pin 4
 }
 
 void loop() {
