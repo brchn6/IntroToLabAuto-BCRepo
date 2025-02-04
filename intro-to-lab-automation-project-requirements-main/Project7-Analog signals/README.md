@@ -16,6 +16,10 @@ The purpose of this project is to dim and increase the led light using the rotar
 - Use voltmeter in Scopy to see range of values when turning the rotary. (you will need to create an Arduino file for this)
 ```
 i got a range span fron 0 to 1023
+
+![alt text](image.png)
+
+For the next part i got 16us between each analog pick
 ```
 - pin 4 (grove LED) is not supported for PWM. Install package MD_PWM, and set pin 4 to be PWM using the package documentation.
 - Using the rotary value, update the PWM value. Note the range of values that can be used according to package documentation. Change your code accordingly.
