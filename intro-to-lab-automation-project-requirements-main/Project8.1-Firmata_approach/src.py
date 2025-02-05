@@ -23,10 +23,10 @@ from pymata4 import pymata4
 
 # Define Arduino pin assignments
 BUTTON_PIN = 2   # Digital input pin for the button
-LED_PIN = 13     # Digital output pin for the LED
+LED_PIN = 4     # Digital output pin for the LED
 
-# Default LED on time: 30 ms (converted to seconds)
-DEFAULT_LED_TIME = 0.03
+# Default LED on time: 300 ms (converted to seconds)
+DEFAULT_LED_TIME = 0.3
 
 class ArduinoController:
     """
@@ -52,24 +52,31 @@ class ArduinoController:
     def button_callback(self, data):
         """
         Callback function for button state changes.
-        Data is a list: [pin, state, timestamp].
-        Assumes button is wired so that the signal is LOW (0) when pressed.
+        Unpacks the data received from pymata4.
+        The expected data list contains at least three items:
+        [pin, state, timestamp, ...]. Any extra values are ignored.
         """
-        pin, state, timestamp = data
-        # Check for button press (active LOW)
+        # Extended unpacking: extra values are captured in 'extra' and ignored
+        pin, state, timestamp, *extra = data
+
+        # For debugging, you might print the extra data if desired:
+        # print("Extra data:", extra)
+
+        # Check for button press (assuming active LOW: 0 means pressed)
         if state == 0 and not self.button_state:
-            self.button_state = True  # Update internal state
+            self.button_state = True
             print("Button pressed!")
-            self.turn_led_on()        # Turn LED on immediately
-            # Cancel any previous timer if it exists
+            self.turn_led_on()
+            # Cancel any previous timer and schedule LED turn off
             if self.led_off_timer is not None:
                 self.led_off_timer.cancel()
-            # Schedule the LED to be turned off after led_off_time seconds
             self.led_off_timer = threading.Timer(self.led_off_time, self.turn_led_off)
             self.led_off_timer.start()
         elif state == 1 and self.button_state:
-            self.button_state = False  # Button released
+            self.button_state = False
             print("Button released!")
+
+
 
     def turn_led_on(self):
         """Turns the LED on if it is not already on."""
