@@ -25,7 +25,8 @@ class ArduinoGUI:
         self.board.set_pin_mode_digital_output(self.LED_PIN)
         
     def button_press_callback(self, data):
-        pin, value, timestamp = data
+        if len(data) >= 2:
+            value = data[2] if len(data) > 2 else data[1]
         if value == 1:  # Button pressed
             self.add_log_message("Button pressed")
             self.turn_on_light()
