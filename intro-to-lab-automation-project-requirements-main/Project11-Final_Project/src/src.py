@@ -84,6 +84,7 @@ def update_plot():
     ax.set_xlabel("Time (ms)")
     ax.set_ylabel("Angle (deg)")
     ax.set_title("Servo Angle Over Time")
+    ax.grid(True)  # Add grid to the plot
     canvas.draw()
 
 def update_led():

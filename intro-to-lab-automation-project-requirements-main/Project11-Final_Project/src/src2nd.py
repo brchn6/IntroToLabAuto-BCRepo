@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 # ======= CONFIGURATION =======
-SERIAL_PORT = "COM3"       # Change this to your Arduino serial port (e.g., "/dev/ttyUSB0" on Linux)
+SERIAL_PORT = "COM5"       # Change this to your Arduino serial port (e.g., "/dev/ttyUSB0" on Linux)
 BAUD_RATE = 9600           # Must match the Arduino Serial.begin() baud rate
 CSV_FILENAME = "data_log.csv"  # Output CSV file name
 
@@ -102,12 +102,10 @@ csv_file.close()
 ser.close()
 
 
-"""
-To run this script, you can use a command like:
+# """
+# To run this script, you can use a command like:
 
-conda activate intro
-python C:\Users\itclass11\Desktop\IntroToLabAuto-BCRepo\intro-to-lab-automation-project-requirements-main\Project11-Final_Project\src\src2nd.py
-
-
-This updated code now keeps track of the fan state info sent from the ino code.
-"""
+# conda activate intro
+# python C:\Users\itclass11\Desktop\IntroToLabAuto-BCRepo\intro-to-lab-automation-project-requirements-main\Project11-Final_Project\src\src2nd.py
+# This updated code now keeps track of the fan state info sent from the ino code
+# """
