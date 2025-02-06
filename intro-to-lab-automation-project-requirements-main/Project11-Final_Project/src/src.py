@@ -7,6 +7,7 @@ import threading
 import csv
 import time
 from collections import deque
+import os
 
 # -------------------------------
 # Configuration Parameters
@@ -23,7 +24,10 @@ angle_data = deque(maxlen=MAX_DATA_POINTS)
 buzzer_state = 0  # Latest buzzer state
 
 # Open CSV file to log data
-csv_file = open("data_log.csv", "w", newline="")
+# dir to save 
+dir_path = os.path.dirname(os.path.realpath(__file__))
+csv_file_path = os.path.join(dir_path, "data_log.csv")
+csv_file = open(csv_file_path, "w", newline="")
 csv_writer = csv.writer(csv_file)
 csv_writer.writerow(["Time (ms)", "Angle (deg)", "Buzzer State"])
 
@@ -103,7 +107,7 @@ led_label = tk.Label(led_frame, text="    ", bg="green", relief="sunken")
 led_label.pack(side=tk.LEFT)
 
 # Create a matplotlib figure for the angle plot
-fig, ax = plt.subplots(figsize=(5, 4))
+fig, ax = plt.subplots(figsize=(50, 40))
 canvas = FigureCanvasTkAgg(fig, master=root)
 canvas_widget = canvas.get_tk_widget()
 canvas_widget.pack()
@@ -115,3 +119,7 @@ serial_thread.start()
 # Set up a protocol to handle window closing properly
 root.protocol("WM_DELETE_WINDOW", on_closing)
 root.mainloop()
+
+
+# conda activate intro
+# python intro-to-lab-automation-project-requirements-main/Project11-Final_Project/src/src.py
