@@ -19,8 +19,8 @@
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // Hardware pins
-const int servoPin = 9;          // Servo motor control pin
-const int buzzerPin = 8;         // Buzzer output pin
+const int servoPin = 7;          // Servo motor control pin
+const int buzzerPin = 5;         // Buzzer output pin
 const int accelerometerPin = A0; // Simulated accelerometer input
 
 // Threshold for buzzer activation (in degrees)
