@@ -1,17 +1,8 @@
-/*
-  Project 11 - Final Project
-  This sketch reads an accelerometer sensor (simulated via analog input A0),
-  maps the sensor reading to an angle (0-180°) for a servo motor,
-  displays the angle, buzzer state, and fan state on an OLED display,
-  and turns on a buzzer if the angle exceeds a set threshold.
-  It also logs the time (ms since start), angle, buzzer state, and fan state via Serial (CSV format).
-  Additionally, the fan is turned on when a button is pressed.
-*/
-
 #include <Servo.h>
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include "Arduino_SensorKit.h"  // Include the SensorKit library
 
 // OLED display settings
 #define SCREEN_WIDTH 128
@@ -22,8 +13,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 // Hardware pins
 const int servoPin = 7;          // Servo motor control pin
 const int buzzerPin = 5;         // Buzzer output pin
-const int accelerometerPin = A0; // Simulated accelerometer input
-const int FAN_PIN = 3;           // Fan control pin (added semicolon)
+const int FAN_PIN = 3;           // Fan control pin
 const int buttonPin = 2;         // Button input pin
 
 // Threshold for buzzer activation (in degrees)
@@ -37,6 +27,10 @@ unsigned long startTime;
 
 void setup() {
   Serial.begin(9600);
+  while (!Serial);  // Wait for serial connection
+
+  // Initialize the accelerometer from SensorKit
+  Accelerometer.begin();
   
   // Initialize the servo motor
   servoMotor.attach(servoPin);
@@ -65,11 +59,12 @@ void setup() {
 }
 
 void loop() {
-  // --- Read the accelerometer sensor ---
-  // (For this example, we simulate it using analogRead)
-  int sensorValue = analogRead(accelerometerPin);
-  // Map the analog value (0–1023) to an angle (0–180°)
-  int angle = map(sensorValue, 0, 1023, 0, 180);
+  // --- Read the accelerometer sensor using SensorKit ---
+  // For this example, we use the X-axis.
+  // If the accelerometer returns values from -1.0 to 1.0,
+  // then mapping (x + 1.0) * 90 gives 0 to 180 degrees.
+  float xReading = Accelerometer.readX();
+  int angle = (int)((xReading + 1.0) * 90.0);  // Adjust if needed
   
   // --- Update the servo motor ---
   servoMotor.write(angle);
@@ -79,7 +74,7 @@ void loop() {
   int buzzerState = 0;
   if (angle > thresholdAngle) {
     digitalWrite(buzzerPin, HIGH);
-    tone(buzzerPin, 120); // Play a 1kHz tone
+    tone(buzzerPin, 120); // Play a tone (frequency may need adjustment)
     buzzerState = 1;
   } else {
     digitalWrite(buzzerPin, LOW);
@@ -88,11 +83,9 @@ void loop() {
   }
   
   // --- Check the button to control the fan ---
-  // Since the button is set with an internal pull-up,
-  // it will read LOW when pressed.
-  static bool fanState = false; // Variable to store the fan state
-  static bool lastButtonState = HIGH; // Variable to store the last button state
-
+  // With the internal pull-up enabled, the button reads LOW when pressed.
+  static bool fanState = false; // Store the fan state
+  static bool lastButtonState = HIGH;
   int buttonState = digitalRead(buttonPin);
   if (buttonState == LOW && lastButtonState == HIGH) {
     // Toggle the fan state when the button is pressed
@@ -100,7 +93,6 @@ void loop() {
     digitalWrite(FAN_PIN, fanState ? HIGH : LOW);
   }
   lastButtonState = buttonState;
-
   
   // --- Update the OLED display ---
   display.clearDisplay();
@@ -111,16 +103,10 @@ void loop() {
   display.println(angle);
   
   display.print("Buz:");
-  if (buzzerState == 1)
-    display.println("ON");
-  else
-    display.println("OFF");
+  display.println(buzzerState == 1 ? "ON" : "OFF");
     
   display.print("Fan:");
-  if (digitalRead(FAN_PIN) == HIGH)
-    display.println("ON");
-  else
-    display.println("OFF");
+  display.println(digitalRead(FAN_PIN) == HIGH ? "ON" : "OFF");
     
   display.display();
   
@@ -135,5 +121,5 @@ void loop() {
   Serial.print(",");
   Serial.println(digitalRead(FAN_PIN) == HIGH ? 1 : 0);
   
-  delay(100); // Wait 100 ms before the next loop iteration
+  delay(100); // Wait 100 ms before the next iteration
 }
