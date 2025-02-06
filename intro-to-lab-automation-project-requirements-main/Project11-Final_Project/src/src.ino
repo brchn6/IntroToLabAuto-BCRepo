@@ -62,9 +62,9 @@ void loop() {
   // --- Read the accelerometer sensor using SensorKit ---
   // For this example, we use the X-axis.
   // If the accelerometer returns values from -1.0 to 1.0,
-  // then mapping (x + 1.0) * 90 gives 0 to 180 degrees.
+  // then mapping (x + 1.0) * 80 + 10 gives 10 to 170 degrees.
   float xReading = Accelerometer.readX();
-  int angle = (int)((xReading + 1.0) * 90.0);  // Adjust if needed
+  int angle = (int)((xReading + 1.0) * 80.0 + 10.0);  // Adjust to range 10 to 170
   
   // --- Update the servo motor ---
   servoMotor.write(angle);
