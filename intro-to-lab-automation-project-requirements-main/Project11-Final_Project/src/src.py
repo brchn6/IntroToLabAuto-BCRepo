@@ -9,192 +9,246 @@ import time
 from collections import deque
 import os
 import signal
+from matplotlib.animation import FuncAnimation
 
 # -------------------------------
 # Configuration Parameters
 # -------------------------------
 SERIAL_PORT = 'COM5'
 BAUD_RATE = 9600
-MAX_DATA_POINTS = 100  # Maximum number of data points to display on the graph
+MAX_DATA_POINTS = 100
+UPDATE_INTERVAL = 100  # Update plot every 100ms
 
 # -------------------------------
 # Data Storage and CSV Setup
 # -------------------------------
 time_data = deque(maxlen=MAX_DATA_POINTS)
 angle_data = deque(maxlen=MAX_DATA_POINTS)
-buzzer_state = 0  # Latest buzzer state
-fan_state = 0     # Latest fan state
+buzzer_state = 0
+fan_state = 0
 
-# Set up CSV file in the same directory as this script
+# Set up CSV file
 dir_path = os.path.dirname(os.path.realpath(__file__))
 csv_file_path = os.path.join(dir_path, "data_log.csv")
 csv_file = open(csv_file_path, "w", newline="")
 csv_writer = csv.writer(csv_file)
 csv_writer.writerow(["Time (ms)", "Angle (deg)", "Buzzer State", "Fan State"])
 
-# Global serial object
+# Global variables
 ser = None
-
-# Flag to control the serial reading thread
 running = True
+plot_pause = False
 
-# -------------------------------
-# Serial Reading Function
-# -------------------------------
-def read_serial():
-    global buzzer_state, fan_state, running, ser
+def cleanup():
+    """Comprehensive cleanup function"""
+    global running, ser, csv_file
+    print("Performing cleanup...")
+    running = False
+    
+    # Stop the fan
     try:
-        # Open the serial port and store the object globally
-        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
-        time.sleep(2)  # Wait for the serial connection to initialize
-        while running:
+        if ser and ser.is_open:
+            ser.write(b'F0')
+            time.sleep(0.1)  # Give time for the command to be sent
+            ser.close()
+            print("Serial port closed and fan stopped")
+    except Exception as e:
+        print(f"Error during serial cleanup: {e}")
+
+    # Close CSV file
+    try:
+        if not csv_file.closed:
+            csv_file.close()
+            print("CSV file closed")
+    except Exception as e:
+        print(f"Error closing CSV file: {e}")
+
+def read_serial():
+    """Enhanced serial reading function with better error handling"""
+    global buzzer_state, fan_state, running, ser
+    
+    while running:
+        try:
+            if not ser or not ser.is_open:
+                ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
+                time.sleep(2)
+                print("Serial connection established")
+                
             line = ser.readline().decode('utf-8').strip()
             if line:
-                try:
-                    # Expected CSV format: time,angle,buzzerState,fanState
-                    parts = line.split(',')
-                    if len(parts) == 4:
-                        t_val = int(parts[0])
-                        angle_val = int(parts[1])
-                        buzzer_val = int(parts[2])
-                        fan_val = int(parts[3])
-                        
-                        # Append new values to our data deques
-                        time_data.append(t_val)
-                        angle_data.append(angle_val)
-                        
-                        # Update state variables
-                        buzzer_state = buzzer_val
-                        fan_state = fan_val
-                        
-                        # Log the data to CSV
-                        csv_writer.writerow([t_val, angle_val, buzzer_val, fan_val])
-                        
-                        # Update the GUI elements
-                        update_plot()
-                        update_led()
-                        update_fan()
-                except Exception as e:
-                    print("Error parsing line:", line, e)
-    except Exception as e:
-        print("Error opening serial port:", e)
+                parts = line.split(',')
+                if len(parts) == 4:
+                    t_val = int(parts[0])
+                    angle_val = int(parts[1])
+                    buzzer_val = int(parts[2])
+                    fan_val = int(parts[3])
+                    
+                    time_data.append(t_val)
+                    angle_data.append(angle_val)
+                    buzzer_state = buzzer_val
+                    fan_state = fan_val
+                    
+                    csv_writer.writerow([t_val, angle_val, buzzer_val, fan_val])
+                    
+                    # Update GUI elements
+                    root.after(0, update_led)
+                    root.after(0, update_fan)
+                    
+        except serial.SerialException as e:
+            print(f"Serial error: {e}")
+            time.sleep(1)  # Wait before retrying
+        except Exception as e:
+            print(f"Error in serial reading: {e}")
+            time.sleep(1)
 
-# -------------------------------
-# GUI Update Functions
-# -------------------------------
-def update_plot():
-    try:
-        ax.cla()
-        ax.plot(list(time_data), list(angle_data), marker='o', linestyle='-')
-        ax.set_xlabel("Time (ms)")
-        ax.set_ylabel("Angle (deg)")
-        ax.set_title("Servo Angle Over Time")
-        ax.grid(True)
-        canvas.draw()
-    except tk.TclError:
-        # Likely the widget was destroyed
-        pass
+def update_plot(frame):
+    """Improved plot update function with better styling"""
+    if not plot_pause and len(time_data) > 0:
+        ax.clear()
+        
+        # Plot with improved styling
+        ax.plot(list(time_data), list(angle_data), 
+                color='#2196F3', 
+                linewidth=2, 
+                marker='o',
+                markersize=4,
+                markerfacecolor='white',
+                markeredgecolor='#2196F3')
+        
+        # Customize grid
+        ax.grid(True, linestyle='--', alpha=0.7)
+        
+        # Customize labels and title
+        ax.set_xlabel("Time (ms)", fontsize=10, fontweight='bold')
+        ax.set_ylabel("Angle (degrees)", fontsize=10, fontweight='bold')
+        ax.set_title("Servo Angle Monitor", fontsize=12, fontweight='bold', pad=10)
+        
+        # Add range indicators
+        ax.axhline(y=0, color='#FF9800', linestyle='--', alpha=0.5)
+        ax.axhline(y=180, color='#FF9800', linestyle='--', alpha=0.5)
+        
+        # Set y-axis limits with some padding
+        ax.set_ylim(-10, 190)
+        
+        # Customize appearance
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        
+        # Add legend
+        ax.legend(['Servo Angle'], loc='upper right')
 
 def update_led():
+    """Update buzzer LED indicator"""
     try:
-        # Update the buzzer LED indicator: Red means ON, Green means OFF
-        if buzzer_state == 1:
-            led_label.config(bg="red")
-        else:
-            led_label.config(bg="green")
+        color = "red" if buzzer_state == 1 else "green"
+        led_label.config(bg=color)
     except tk.TclError:
         pass
 
 def update_fan():
+    """Update fan LED indicator"""
     try:
-        # Update the fan LED indicator: Green means ON, Red means OFF
-        if fan_state == 1:
-            fan_led_label.config(bg="green")
-        else:
-            fan_led_label.config(bg="red")
+        color = "green" if fan_state == 1 else "red"
+        fan_led_label.config(bg=color)
     except tk.TclError:
         pass
 
+def toggle_plot():
+    """Toggle plot updates"""
+    global plot_pause
+    plot_pause = not plot_pause
+
 def on_closing():
-    """Cleanup routine to stop threads, close files, and destroy the GUI."""
-    global running
-    running = False
-    # Allow the serial thread to finish up
-    time.sleep(0.5)
-    csv_file.close()
-    if root.winfo_exists():
+    """Enhanced cleanup routine for window closing"""
+    if tk.messagebox.askokcancel("Quit", "Do you want to quit?"):
+        cleanup()
+        root.quit()
         root.destroy()
 
 def signal_handler(sig, frame):
-    """Handle Ctrl+C (SIGINT) gracefully."""
-    print("Ctrl+C detected, exiting gracefully...")
-    on_closing()
+    """Enhanced signal handler for Ctrl+C"""
+    print("\nCtrl+C detected, performing cleanup...")
+    cleanup()
+    os._exit(0)
 
-# -------------------------------
-# Main Function
-# -------------------------------
-def main():
-    global root, led_label, fan_led_label, ax, canvas, serial_thread, ser
-
-    # Set up the signal handler for Ctrl+C
-    signal.signal(signal.SIGINT, signal_handler)
-
-    # -------------------------------
-    # Set Up the Tkinter GUI
-    # -------------------------------
+def create_gui():
+    """Create the main GUI with improved styling"""
+    global root, led_label, fan_led_label, ax, canvas
+    
     root = tk.Tk()
-    root.title("Servo Angle, Buzzer & Fan Monitor")
-
-    # Buzzer state LED indicator
-    led_frame = tk.Frame(root)
-    led_frame.pack(pady=10)
-    tk.Label(led_frame, text="Buzzer State:").pack(side=tk.LEFT)
-    led_label = tk.Label(led_frame, text="    ", bg="green", relief="sunken")
+    root.title("Servo Angle Monitor")
+    root.geometry("800x600")
+    
+    # Create main container
+    main_frame = ttk.Frame(root, padding="10")
+    main_frame.pack(fill=tk.BOTH, expand=True)
+    
+    # Status indicators frame
+    status_frame = ttk.LabelFrame(main_frame, text="Status Indicators", padding="5")
+    status_frame.pack(fill=tk.X, pady=(0, 10))
+    
+    # Buzzer indicator
+    buzzer_frame = ttk.Frame(status_frame)
+    buzzer_frame.pack(side=tk.LEFT, padx=10)
+    ttk.Label(buzzer_frame, text="Buzzer:").pack(side=tk.LEFT, padx=(0, 5))
+    led_label = tk.Label(buzzer_frame, width=2, height=1, bg="green", relief="sunken")
     led_label.pack(side=tk.LEFT)
-
-    # Fan state LED indicator
-    fan_led_frame = tk.Frame(root)
-    fan_led_frame.pack(pady=10)
-    tk.Label(fan_led_frame, text="Fan State:").pack(side=tk.LEFT)
-    fan_led_label = tk.Label(fan_led_frame, text="    ", bg="green", relief="sunken")
+    
+    # Fan indicator
+    fan_frame = ttk.Frame(status_frame)
+    fan_frame.pack(side=tk.LEFT, padx=10)
+    ttk.Label(fan_frame, text="Fan:").pack(side=tk.LEFT, padx=(0, 5))
+    fan_led_label = tk.Label(fan_frame, width=2, height=1, bg="red", relief="sunken")
     fan_led_label.pack(side=tk.LEFT)
+    
+    # Plot frame
+    plot_frame = ttk.Frame(main_frame)
+    plot_frame.pack(fill=tk.BOTH, expand=True)
+    
+    # Create matplotlib figure
+    fig, ax = plt.subplots(figsize=(8, 4), dpi=100)
+    canvas = FigureCanvasTkAgg(fig, master=plot_frame)
+    canvas.draw()
+    canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+    
+    # Control buttons
+    button_frame = ttk.Frame(main_frame)
+    button_frame.pack(fill=tk.X, pady=(10, 0))
+    
+    ttk.Button(button_frame, text="Pause/Resume", command=toggle_plot).pack(side=tk.LEFT, padx=5)
+    
+    return fig, ax
 
-    # Create a matplotlib figure for the angle plot
-    fig, ax = plt.subplots(figsize=(8, 4))
-    canvas = FigureCanvasTkAgg(fig, master=root)
-    canvas_widget = canvas.get_tk_widget()
-    canvas_widget.pack()
-
-    # Start the serial reading thread (set as daemon so it exits when the main thread exits)
+def main():
+    """Main application function"""
+    global root, fig, ax
+    
+    # Set up signal handler
+    signal.signal(signal.SIGINT, signal_handler)
+    
+    # Create GUI
+    fig, ax = create_gui()
+    
+    # Set up animation
+    ani = FuncAnimation(fig, update_plot, interval=UPDATE_INTERVAL, cache_frame_data=False)
+    
+    # Start serial reading thread
     serial_thread = threading.Thread(target=read_serial, daemon=True)
     serial_thread.start()
-
-    # Set up a protocol to handle window closing properly
+    
+    # Set up window close handler
     root.protocol("WM_DELETE_WINDOW", on_closing)
     
-    # Start the Tkinter event loop
+    # Start main loop
     try:
         root.mainloop()
     except KeyboardInterrupt:
-        # In some environments, Ctrl+C may trigger a KeyboardInterrupt
-        on_closing()
+        cleanup()
+        os._exit(0)
 
-    # Send signal to Arduino to close the board and turn off the fan
-    try:
-        if ser is not None and ser.is_open:
-            ser.write(b'0')  # Send a signal to Arduino to turn off the fan
-            ser.close()      # Close the serial port
-    except Exception as e:
-        print("Error sending close signal to Arduino:", e)
-
-# -------------------------------
-# Entry Point
-# -------------------------------
 if __name__ == '__main__':
     main()
-
-
-
+    
 """
 To run this script, you can use a command like:
 
