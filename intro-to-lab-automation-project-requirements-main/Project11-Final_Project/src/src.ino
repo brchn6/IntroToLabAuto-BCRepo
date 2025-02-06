@@ -42,7 +42,7 @@ void setup() {
   servoMotor.attach(servoPin);
   
   // Set buzzer pin as output and ensure it's off
-  pinMode(buzzerPin, OUTPUT)
+  pinMode(buzzerPin, OUTPUT);
   digitalWrite(buzzerPin, LOW);
 
   // Initialize fan control pin as output and ensure it's off
@@ -79,7 +79,7 @@ void loop() {
   int buzzerState = 0;
   if (angle > thresholdAngle) {
     digitalWrite(buzzerPin, HIGH);
-    tone(buzzerPin, 420); // Play a 1kHz tone
+    tone(buzzerPin, 120); // Play a 1kHz tone
     buzzerState = 1;
   } else {
     digitalWrite(buzzerPin, LOW);
