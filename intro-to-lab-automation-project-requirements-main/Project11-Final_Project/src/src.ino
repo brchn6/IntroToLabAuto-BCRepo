@@ -17,7 +17,7 @@ const int FAN_PIN = 3;           // Fan control pin
 const int buttonPin = 2;         // Button input pin
 
 // Threshold for buzzer activation (in degrees)
-const int thresholdAngle = 45;
+const int thresholdAngle = 100;
 
 // Create a servo object
 Servo servoMotor;
