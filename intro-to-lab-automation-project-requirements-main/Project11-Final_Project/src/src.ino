@@ -1,11 +1,11 @@
 /*
   Project 11 - Final Project
   This sketch reads an accelerometer sensor (simulated via analog input A0),
-  maps the sensor reading to an angle (0-180°) for a servo motor,
+  maps the sensor reading to an angle (0–180°) for a servo motor,
   displays the angle, buzzer state, and fan state on an OLED display,
   and turns on a buzzer if the angle exceeds a set threshold.
   It also logs the time (ms since start), angle, buzzer state, and fan state via Serial (CSV format).
-  Additionally, the fan is turned on when a button is pressed.
+  Additionally, the fan is controlled by the accelerometer reading: it turns ON when the angle exceeds 90°.
 */
 
 #include <Servo.h>
@@ -23,11 +23,11 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 const int servoPin = 7;          // Servo motor control pin
 const int buzzerPin = 5;         // Buzzer output pin
 const int accelerometerPin = A0; // Simulated accelerometer input
-const int FAN_PIN = 3;           // Fan control pin (added semicolon)
-const int buttonPin = 2;         // Button input pin
+const int FAN_PIN = 3;           // Fan control pin
 
-// Threshold for buzzer activation (in degrees)
-const int thresholdAngle = 45;
+// Thresholds (in degrees)
+const int buzzerThresholdAngle = 45;
+const int fanThresholdAngle = 90;
 
 // Create a servo object
 Servo servoMotor;
@@ -48,9 +48,6 @@ void setup() {
   // Initialize fan control pin as output and ensure it's off
   pinMode(FAN_PIN, OUTPUT);
   digitalWrite(FAN_PIN, LOW);
-
-  // Initialize button pin as input with internal pull-up resistor
-  pinMode(buttonPin, INPUT_PULLUP);
   
   // Initialize the OLED display
   if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { 
@@ -66,7 +63,6 @@ void setup() {
 
 void loop() {
   // --- Read the accelerometer sensor ---
-  // (For this example, we simulate it using analogRead)
   int sensorValue = analogRead(accelerometerPin);
   // Map the analog value (0–1023) to an angle (0–180°)
   int angle = map(sensorValue, 0, 1023, 0, 180);
@@ -75,11 +71,10 @@ void loop() {
   servoMotor.write(angle);
   
   // --- Determine the buzzer state ---
-  // Turn the buzzer ON if the angle exceeds the threshold
   int buzzerState = 0;
-  if (angle > thresholdAngle) {
+  if (angle > buzzerThresholdAngle) {
     digitalWrite(buzzerPin, HIGH);
-    tone(buzzerPin, 120); // Play a 1kHz tone
+    tone(buzzerPin, 120); // Play a tone (120 Hz)
     buzzerState = 1;
   } else {
     digitalWrite(buzzerPin, LOW);
@@ -87,20 +82,15 @@ void loop() {
     buzzerState = 0;
   }
   
-  // --- Check the button to control the fan ---
-  // Since the button is set with an internal pull-up,
-  // it will read LOW when pressed.
-  static bool fanState = false; // Variable to store the fan state
-  static bool lastButtonState = HIGH; // Variable to store the last button state
-
-  int buttonState = digitalRead(buttonPin);
-  if (buttonState == LOW && lastButtonState == HIGH) {
-    // Toggle the fan state when the button is pressed
-    fanState = !fanState;
-    digitalWrite(FAN_PIN, fanState ? HIGH : LOW);
+  // --- Control the fan based on the accelerometer reading ---
+  int fanState = 0;
+  if (angle > fanThresholdAngle) {
+    digitalWrite(FAN_PIN, HIGH);
+    fanState = 1;
+  } else {
+    digitalWrite(FAN_PIN, LOW);
+    fanState = 0;
   }
-  lastButtonState = buttonState;
-
   
   // --- Update the OLED display ---
   display.clearDisplay();
@@ -117,7 +107,7 @@ void loop() {
     display.println("OFF");
     
   display.print("Fan:");
-  if (digitalRead(FAN_PIN) == HIGH)
+  if (fanState == 1)
     display.println("ON");
   else
     display.println("OFF");
@@ -133,7 +123,7 @@ void loop() {
   Serial.print(",");
   Serial.print(buzzerState);
   Serial.print(",");
-  Serial.println(digitalRead(FAN_PIN) == HIGH ? 1 : 0);
+  Serial.println(fanState);
   
   delay(100); // Wait 100 ms before the next loop iteration
 }

@@ -96,9 +96,9 @@ def update_led():
 def update_fan():
     # Update the fan LED indicator: Green means OFF, Red means ON
     if fan_state == 1:
-        fan_led_label.config(bg="red")
-    else:
         fan_led_label.config(bg="green")
+    else:
+        fan_led_label.config(bg="red")
 
 def on_closing():
     global running
