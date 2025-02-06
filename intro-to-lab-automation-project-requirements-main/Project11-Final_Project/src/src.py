@@ -120,6 +120,7 @@ serial_thread.start()
 root.protocol("WM_DELETE_WINDOW", on_closing)
 root.mainloop()
 
-
-# conda activate intro
-# python intro-to-lab-automation-project-requirements-main/Project11-Final_Project/src/src.py
+"""
+conda activate intro
+python intro-to-lab-automation-project-requirements-main/Project11-Final_Project/src/src.py
+"""
