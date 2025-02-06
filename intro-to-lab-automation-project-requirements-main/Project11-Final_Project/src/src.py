@@ -11,7 +11,7 @@ from collections import deque
 # -------------------------------
 # Configuration Parameters
 # -------------------------------
-SERIAL_PORT = 'COM3'  # <-- Change this to your serial port (e.g., '/dev/ttyACM0' on Linux/Mac)
+SERIAL_PORT = 'COM5' 
 BAUD_RATE = 9600
 MAX_DATA_POINTS = 100  # Maximum number of data points to display on the graph
 
