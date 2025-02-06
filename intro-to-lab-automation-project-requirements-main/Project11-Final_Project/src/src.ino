@@ -88,12 +88,17 @@ void loop() {
   // --- Check the button to control the fan ---
   // Since the button is set with an internal pull-up,
   // it will read LOW when pressed.
+  static bool fanState = false; // Variable to store the fan state
+  static bool lastButtonState = HIGH; // Variable to store the last button state
+
   int buttonState = digitalRead(buttonPin);
-  if (buttonState == LOW) {
-    digitalWrite(FAN_PIN, HIGH);  // Turn on the fan when button is pressed
-  } else {
-    digitalWrite(FAN_PIN, LOW);   // Turn off the fan when button is released
+  if (buttonState == LOW && lastButtonState == HIGH) {
+    // Toggle the fan state when the button is pressed
+    fanState = !fanState;
+    digitalWrite(FAN_PIN, fanState ? HIGH : LOW);
   }
+  lastButtonState = buttonState;
+
   
   // --- Update the OLED display ---
   display.clearDisplay();
