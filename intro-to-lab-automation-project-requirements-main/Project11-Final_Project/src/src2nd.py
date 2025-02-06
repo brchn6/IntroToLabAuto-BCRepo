@@ -105,7 +105,9 @@ ser.close()
 """
 To run this script, you can use a command like:
 
-kk
+conda activate intro
+python C:\Users\itclass11\Desktop\IntroToLabAuto-BCRepo\intro-to-lab-automation-project-requirements-main\Project11-Final_Project\src\src2nd.py
+
 
 This updated code now keeps track of the fan state info sent from the ino code.
 """
