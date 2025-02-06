@@ -125,7 +125,7 @@ def update_plot(frame):
         
         # Add range indicators
         ax.axhline(y=0, color='#FF9800', linestyle='--', alpha=0.5)
-        ax.axhline(y=180, color='#FF9800', linestyle='--', alpha=0.5)
+        ax.axhline(y=125, color='#FF9800', linestyle='--', alpha=0.5)
         
         # Set y-axis limits with some padding
         ax.set_ylim(-10, 190)
@@ -248,7 +248,7 @@ def main():
 
 if __name__ == '__main__':
     main()
-    
+
 """
 To run this script, you can use a command like:
 
